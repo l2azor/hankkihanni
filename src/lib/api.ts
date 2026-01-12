@@ -11,8 +11,8 @@ export async function saveCheckIn(
     const now = new Date().toISOString()
     
     // 1. 체크인 기록 저장
-    const { error: checkInError } = await supabase
-      .from('check_ins')
+    const { error: checkInError } = await (supabase
+      .from('check_ins') as any)
       .insert({
         user_id: userId,
         response: response,
@@ -26,8 +26,8 @@ export async function saveCheckIn(
     }
 
     // 2. 사용자 스트릭 업데이트
-    const { data: userData, error: userError } = await supabase
-      .from('users')
+    const { data: userData, error: userError } = await (supabase
+      .from('users') as any)
       .select('streak, last_check_in')
       .eq('id', userId)
       .single()
@@ -52,8 +52,8 @@ export async function saveCheckIn(
     }
 
     // 3. 사용자 정보 업데이트
-    const { error: updateError } = await supabase
-      .from('users')
+    const { error: updateError } = await (supabase
+      .from('users') as any)
       .update({
         streak: newStreak,
         last_check_in: now
@@ -84,8 +84,8 @@ export async function getTodayCheckIn(userId: string): Promise<{
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
-    const { data, error } = await supabase
-      .from('check_ins')
+    const { data, error } = await (supabase
+      .from('check_ins') as any)
       .select('response')
       .eq('user_id', userId)
       .gte('responded_at', today.toISOString())
@@ -108,8 +108,8 @@ export async function getTodayCheckIn(userId: string): Promise<{
 
 // 사용자 정보 가져오기
 export async function getUserProfile(userId: string) {
-  const { data, error } = await supabase
-    .from('users')
+  const { data, error } = await (supabase
+    .from('users') as any)
     .select('*')
     .eq('id', userId)
     .single()
@@ -126,8 +126,8 @@ export async function updateGuardianPhone(
   userId: string,
   phone: string
 ): Promise<boolean> {
-  const { error } = await supabase
-    .from('users')
+  const { error } = await (supabase
+    .from('users') as any)
     .update({ guardian_phone: phone })
     .eq('id', userId)
 
@@ -139,8 +139,8 @@ export async function getUnresponsiveUsers(hoursThreshold: number = 48) {
   const thresholdDate = new Date()
   thresholdDate.setHours(thresholdDate.getHours() - hoursThreshold)
 
-  const { data, error } = await supabase
-    .from('users')
+  const { data, error } = await (supabase
+    .from('users') as any)
     .select('id, email, nickname, guardian_phone, last_check_in, streak')
     .or(`last_check_in.lt.${thresholdDate.toISOString()},last_check_in.is.null`)
     .order('last_check_in', { ascending: true, nullsFirst: true })
@@ -154,8 +154,8 @@ export async function getUnresponsiveUsers(hoursThreshold: number = 48) {
 
 // 체크인 히스토리 가져오기
 export async function getCheckInHistory(userId: string, limit: number = 30) {
-  const { data, error } = await supabase
-    .from('check_ins')
+  const { data, error } = await (supabase
+    .from('check_ins') as any)
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
