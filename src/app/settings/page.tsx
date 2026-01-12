@@ -22,11 +22,19 @@ export default function SettingsPage() {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingPassword, setSavingPassword] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
+  const [passwordMessage, setPasswordMessage] = useState({ type: '', text: '' })
   
   const [formData, setFormData] = useState({
     nickname: '',
     guardianPhone: ''
+  })
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   })
 
   // 사용자 정보 로드
@@ -122,6 +130,63 @@ export default function SettingsPage() {
       setMessage({ type: 'error', text: '저장에 실패했습니다' })
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }))
+    setPasswordMessage({ type: '', text: '' })
+  }
+
+  const handlePasswordSave = async () => {
+    setSavingPassword(true)
+    setPasswordMessage({ type: '', text: '' })
+
+    // 유효성 검사
+    if (passwordData.newPassword.length < 6) {
+      setPasswordMessage({ type: 'error', text: '새 비밀번호는 6자 이상이어야 합니다' })
+      setSavingPassword(false)
+      return
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: '새 비밀번호가 일치하지 않습니다' })
+      setSavingPassword(false)
+      return
+    }
+
+    try {
+      // 현재 비밀번호로 재인증
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: passwordData.currentPassword
+      })
+
+      if (signInError) {
+        setPasswordMessage({ type: 'error', text: '현재 비밀번호가 올바르지 않습니다' })
+        setSavingPassword(false)
+        return
+      }
+
+      // 새 비밀번호로 변경
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: passwordData.newPassword
+      })
+
+      if (updateError) {
+        throw new Error(updateError.message)
+      }
+
+      setPasswordMessage({ type: 'success', text: '비밀번호가 변경되었습니다! ✨' })
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+    } catch (error) {
+      console.error('비밀번호 변경 오류:', error)
+      setPasswordMessage({ type: 'error', text: '비밀번호 변경에 실패했습니다' })
+    } finally {
+      setSavingPassword(false)
     }
   }
 
@@ -256,6 +321,90 @@ export default function SettingsPage() {
                 매일 오전 11시 ~ 오후 2시 사이 랜덤 시간에 알림
               </p>
             </div>
+          </div>
+        </motion.div>
+
+        {/* 보안 설정 (비밀번호 변경) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="card p-6 mb-6"
+        >
+          <h3 className="text-lg font-bold text-[var(--color-cocoa)] mb-4">
+            🔐 보안 설정
+          </h3>
+          
+          <div className="space-y-4">
+            {/* 현재 비밀번호 */}
+            <div>
+              <label className="block text-sm font-medium text-[var(--color-cocoa)] mb-1">
+                현재 비밀번호
+              </label>
+              <input
+                type="password"
+                name="currentPassword"
+                value={passwordData.currentPassword}
+                onChange={handlePasswordChange}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-[var(--color-butter)] focus:border-[var(--color-coral)] focus:outline-none transition-colors bg-white"
+                placeholder="현재 비밀번호 입력"
+              />
+            </div>
+
+            {/* 새 비밀번호 */}
+            <div>
+              <label className="block text-sm font-medium text-[var(--color-cocoa)] mb-1">
+                새 비밀번호
+              </label>
+              <input
+                type="password"
+                name="newPassword"
+                value={passwordData.newPassword}
+                onChange={handlePasswordChange}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-[var(--color-butter)] focus:border-[var(--color-coral)] focus:outline-none transition-colors bg-white"
+                placeholder="6자 이상"
+              />
+            </div>
+
+            {/* 새 비밀번호 확인 */}
+            <div>
+              <label className="block text-sm font-medium text-[var(--color-cocoa)] mb-1">
+                새 비밀번호 확인
+              </label>
+              <input
+                type="password"
+                name="confirmPassword"
+                value={passwordData.confirmPassword}
+                onChange={handlePasswordChange}
+                className="w-full px-4 py-3 rounded-2xl border-2 border-[var(--color-butter)] focus:border-[var(--color-coral)] focus:outline-none transition-colors bg-white"
+                placeholder="새 비밀번호 재입력"
+              />
+            </div>
+
+            {/* 비밀번호 메시지 */}
+            {passwordMessage.text && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className={`p-3 rounded-xl text-sm ${
+                  passwordMessage.type === 'success' 
+                    ? 'bg-green-100 text-green-700' 
+                    : 'bg-red-100 text-red-700'
+                }`}
+              >
+                {passwordMessage.text}
+              </motion.div>
+            )}
+
+            {/* 비밀번호 변경 버튼 */}
+            <AnimatedButton
+              onClick={handlePasswordSave}
+              disabled={savingPassword || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+              variant="secondary"
+              className="w-full"
+            >
+              {savingPassword ? '변경 중...' : '🔑 비밀번호 변경'}
+            </AnimatedButton>
           </div>
         </motion.div>
 
