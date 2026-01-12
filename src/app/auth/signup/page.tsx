@@ -106,8 +106,8 @@ export default function SignUpPage() {
 
       if (authData.user) {
         // 2. users 테이블에 추가 정보 저장
-        const { error: profileError } = await supabase
-          .from('users')
+        const { error: profileError } = await (supabase
+          .from('users') as any)
           .insert({
             id: authData.user.id,
             email: formData.email,
