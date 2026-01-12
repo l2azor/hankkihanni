@@ -50,7 +50,7 @@ export async function subscribeToPush(
     // 새 구독 생성
     subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource
     });
 
     console.log('새 푸시 구독 생성:', subscription);
