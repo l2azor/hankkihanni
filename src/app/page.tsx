@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -20,7 +20,36 @@ const DEMO_USER = {
   lastCheckIn: null as string | null,
 }
 
+// Suspense로 감싸기 위한 래퍼 컴포넌트
 export default function Home() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <HomeContent />
+    </Suspense>
+  )
+}
+
+function LoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <motion.div
+        animate={{ 
+          rotate: [0, 360],
+          scale: [1, 1.2, 1]
+        }}
+        transition={{ 
+          rotate: { repeat: Infinity, duration: 2, ease: "linear" },
+          scale: { repeat: Infinity, duration: 1 }
+        }}
+        className="text-6xl"
+      >
+        🍳
+      </motion.div>
+    </div>
+  )
+}
+
+function HomeContent() {
   const searchParams = useSearchParams()
   const [user, setUser] = useState(DEMO_USER)
   const [hasCheckedIn, setHasCheckedIn] = useState(false)
