@@ -97,7 +97,7 @@ export default function AdminPage() {
 
       if (result.success) {
         // 알림 로그 저장
-        await supabase.from('emergency_alerts').insert({
+        await (supabase.from('emergency_alerts') as any).insert({
           user_id: user.id,
           guardian_phone: user.guardian_phone,
           message,
