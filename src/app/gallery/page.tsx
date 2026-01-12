@@ -77,8 +77,8 @@ export default function GalleryPage() {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user) {
-        const { data: profile } = await supabase
-          .from('users')
+        const { data: profile } = await (supabase
+          .from('users') as any)
           .select('streak')
           .eq('id', user.id)
           .single()

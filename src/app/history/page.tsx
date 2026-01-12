@@ -31,8 +31,8 @@ export default function HistoryPage() {
         const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
         const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0)
 
-        const { data, error } = await supabase
-          .from('check_ins')
+        const { data, error } = await (supabase
+          .from('check_ins') as any)
           .select('*')
           .eq('user_id', user.id)
           .gte('responded_at', startOfMonth.toISOString())

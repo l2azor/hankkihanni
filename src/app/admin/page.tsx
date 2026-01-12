@@ -40,8 +40,8 @@ export default function AdminPage() {
       const threshold = new Date()
       threshold.setHours(threshold.getHours() - 48)
 
-      const { data: users, error: usersError } = await supabase
-        .from('users')
+      const { data: users, error: usersError } = await (supabase
+        .from('users') as any)
         .select('id, email, nickname, guardian_phone, last_check_in, streak')
         .or(`last_check_in.lt.${threshold.toISOString()},last_check_in.is.null`)
         .order('last_check_in', { ascending: true, nullsFirst: true })
@@ -53,8 +53,8 @@ export default function AdminPage() {
       }
 
       // 최근 긴급 알림 조회
-      const { data: alerts, error: alertsError } = await supabase
-        .from('emergency_alerts')
+      const { data: alerts, error: alertsError } = await (supabase
+        .from('emergency_alerts') as any)
         .select('*')
         .order('sent_at', { ascending: false })
         .limit(20)

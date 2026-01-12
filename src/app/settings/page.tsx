@@ -40,8 +40,8 @@ export default function SettingsPage() {
           return
         }
 
-        const { data: profile, error } = await supabase
-          .from('users')
+        const { data: profile, error } = await (supabase
+          .from('users') as any)
           .select('*')
           .eq('id', authUser.id)
           .single()
@@ -93,8 +93,8 @@ export default function SettingsPage() {
     setMessage({ type: '', text: '' })
 
     try {
-      const { error } = await supabase
-        .from('users')
+      const { error } = await (supabase
+        .from('users') as any)
         .update({
           nickname: formData.nickname,
           guardian_phone: formData.guardianPhone

@@ -52,8 +52,8 @@ export default function Home() {
         setIsLoggedIn(true)
         
         // 사용자 프로필 로드
-        const { data: profile } = await supabase
-          .from('users')
+        const { data: profile } = await (supabase
+          .from('users') as any)
           .select('*')
           .eq('id', authUser.id)
           .single()
@@ -71,8 +71,8 @@ export default function Home() {
         const today = new Date()
         today.setHours(0, 0, 0, 0)
 
-        const { data: todayCheckIn } = await supabase
-          .from('check_ins')
+        const { data: todayCheckIn } = await (supabase
+          .from('check_ins') as any)
           .select('id')
           .eq('user_id', authUser.id)
           .gte('responded_at', today.toISOString())
