@@ -72,6 +72,32 @@ export interface Database {
           created_at?: string
         }
       }
+      emergency_alerts: {
+        Row: {
+          id: string
+          user_id: string
+          guardian_phone: string
+          message: string
+          sent_at: string
+          success: boolean
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          guardian_phone: string
+          message: string
+          sent_at?: string
+          success?: boolean
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          guardian_phone?: string
+          message?: string
+          sent_at?: string
+          success?: boolean
+        }
+      }
     }
   }
 }
